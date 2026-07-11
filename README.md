@@ -1,6 +1,6 @@
 <h1><img src="docs/assets/logo.svg" alt="" width="48" height="48" align="absmiddle"> Foresight Reborn</h1>
 
-A GNOME Shell extension that opens the Activities overview when the current workspace is empty.
+Foresight Reborn makes empty workspaces immediately useful by opening the Activities overview automatically, keeping your apps and search ready for whatever comes next.
 
 It reacts to window and workspace events, so there is no polling and no configuration. The overview opens when you switch to an empty workspace or close its last window, and closes when you open a window or leave that workspace. An overview opened manually is never closed by the extension.
 

@@ -1,6 +1,6 @@
 {
   "name": "Foresight Reborn",
-  "description": "Automagically opens the activities view when workspace is empty. It uses callbacks to monitor windows and workspaces (instead of actively checking on them on certain time intervals), which makes it very efficient and responsive.",
+  "description": "Makes empty workspaces immediately useful by opening the Activities overview automatically, keeping your apps and search ready for whatever comes next.",
   "uuid": "foresight-reborn@gabrielpalassi.github.io",
   "shell-version": ["46", "47", "48", "49", "50"],
   "url": "https://github.com/gabrielpalassi/ForesightReborn"
