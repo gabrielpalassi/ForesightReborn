@@ -1,0 +1,11 @@
+# Ignore build output directory
+dist/
+
+# Ignore node modules (dependencies)
+node_modules/
+
+# Ignore VS Code workspace settings
+.vscode/
+
+# Ignore editor backup files (e.g., Vim, Emacs, Gedit)
+*~
