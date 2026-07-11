@@ -7,6 +7,7 @@
 import Meta from 'gi://Meta';
 import Gio from 'gi://Gio';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as WindowManager from 'resource:///org/gnome/shell/ui/windowManager.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 // Window types that should trigger overview behavior
@@ -75,8 +76,8 @@ class ForesightReborn {
         this._windowRemovalGeneration = 0;
         this._workspaceSwitchGeneration = 0;
         this._temporaryWindowSignals = new Map();
-        this._windowRemovalSignals = new Map();
         this._laterIds = new Set();
+        this._closeAnimationTimeoutIds = new Set();
         this._mutterSettings = Gio.Settings.new('org.gnome.mutter');
 
         this._connectSignals();
@@ -149,6 +150,8 @@ class ForesightReborn {
         if (!this._isValidWindow(window, true)) return;
 
         if (this._isTemporaryWindow(window)) {
+            // Recheck it if the application reuses this temporary window as
+            // its main window without emitting another window-added signal.
             this._watchTemporaryWindow(window);
             return;
         }
@@ -161,30 +164,26 @@ class ForesightReborn {
         // Ignore windows not on current workspace
         if (workspace !== this._currentWorkspace) return;
 
+        // The window can no longer change into a main application window, so
+        // disconnect any temporary-window property watchers attached to it.
         this._unwatchTemporaryWindow(window);
 
         // Ignore invalid or temporary windows
         if (!this._isValidWindow(window) || this._isTemporaryWindow(window)) return;
 
-        // The compositor actor is destroyed when Shell finishes the close
-        // animation, allowing us to react without guessing its duration.
+        // Use Shell's own exported animation duration. The compositor actor
+        // may already be unavailable when window-removed is emitted, so its
+        // signals and internal destroying set cannot be relied upon here.
         const generation = ++this._windowRemovalGeneration;
-        const checkWorkspace = () => {
+        const animationTime =
+            window.get_window_type() === Meta.WindowType.NORMAL
+                ? WindowManager.DESTROY_WINDOW_ANIMATION_TIME
+                : WindowManager.DIALOG_DESTROY_WINDOW_ANIMATION_TIME;
+        this._runAfterDelay(animationTime, () => {
             if (generation !== this._windowRemovalGeneration || !this._workspaceManager) return;
 
             if (!this._workspaceHasValidWindows()) this._showOverview();
-        };
-
-        const actor = window.get_compositor_private();
-        if (actor) {
-            const signalId = actor.connect('destroy', () => {
-                this._windowRemovalSignals.delete(actor);
-                checkWorkspace();
-            });
-            this._windowRemovalSignals.set(actor, signalId);
-        } else {
-            this._runBeforeRedraw(checkWorkspace);
-        }
+        });
     }
 
     _onWorkspaceSwitched() {
@@ -243,6 +242,14 @@ class ForesightReborn {
             return false;
         });
         this._laterIds.add(laterId);
+    }
+
+    _runAfterDelay(delay, callback) {
+        const timeoutId = setTimeout(() => {
+            this._closeAnimationTimeoutIds.delete(timeoutId);
+            callback();
+        }, delay);
+        this._closeAnimationTimeoutIds.add(timeoutId);
     }
 
     _showOverview() {
@@ -306,6 +313,11 @@ class ForesightReborn {
     }
 
     _watchTemporaryWindow(window) {
+        // Some applications reuse a splash or updater Meta.Window for their
+        // main window instead of emitting window-added again. Watch the
+        // identity properties used by our temporary-window patterns so the
+        // window can be reclassified as soon as it stops matching. Once that
+        // happens, stop watching it and handle it like a newly added window.
         if (this._temporaryWindowSignals.has(window)) return;
 
         const recheckWindow = () => {
@@ -324,6 +336,9 @@ class ForesightReborn {
     }
 
     _unwatchTemporaryWindow(window) {
+        // Remove every property watcher registered above. This is called when
+        // a temporary window becomes a normal window, is removed, leaves the
+        // active workspace, or the extension is disabled.
         const signalIds = this._temporaryWindowSignals.get(window);
         if (!signalIds) return;
 
@@ -336,15 +351,15 @@ class ForesightReborn {
             this._unwatchTemporaryWindow(window);
     }
 
-    _disconnectWindowRemovalSignals() {
-        for (const [actor, signalId] of this._windowRemovalSignals) actor.disconnect(signalId);
-        this._windowRemovalSignals.clear();
-    }
-
     _removeLaters() {
         const laters = global.compositor.get_laters();
         for (const laterId of this._laterIds) laters.remove(laterId);
         this._laterIds.clear();
+    }
+
+    _removeCloseAnimationTimeouts() {
+        for (const timeoutId of this._closeAnimationTimeoutIds) clearTimeout(timeoutId);
+        this._closeAnimationTimeoutIds.clear();
     }
 
     //
@@ -353,8 +368,8 @@ class ForesightReborn {
 
     destroy() {
         this._disconnectSignals();
-        this._disconnectWindowRemovalSignals();
         this._removeLaters();
+        this._removeCloseAnimationTimeouts();
 
         this._windowRemovalGeneration++;
         this._workspaceSwitchGeneration++;
@@ -366,8 +381,8 @@ class ForesightReborn {
         this._currentWorkspace = null;
         this._mutterSettings = null;
         this._temporaryWindowSignals = null;
-        this._windowRemovalSignals = null;
         this._laterIds = null;
+        this._closeAnimationTimeoutIds = null;
     }
 }
 
