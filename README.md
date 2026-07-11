@@ -66,6 +66,35 @@ npm run fmt-lint:fix       # automatically fix formatting and lint issues
 
 After changing the extension, run `npm run all` before testing it. The nested multi-monitor session is useful for checking workspace behavior with **Workspaces on primary display only** enabled.
 
+## Contributing
+
+Contributions are welcome. The expected development flow is:
+
+1. Fork the repository and create a focused branch from the latest default branch.
+2. Install dependencies with `npm ci`.
+3. Make your changes, keeping each pull request limited to one clear concern.
+4. Run `npm run fmt-lint` and fix any reported formatting or lint issues.
+5. Run `npm run all`, then test the extension in a nested GNOME Shell session with `npm run start` or `npm run start:multimonitor` as appropriate.
+6. Commit the changes and open a pull request describing what changed, why it changed, and how it was tested.
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages:
+
+```text
+<type>: <short description>
+```
+
+Write the description in the imperative mood, keep it concise, and omit the trailing period. Common types include:
+
+- `feat`: add user-facing functionality
+- `fix`: correct a bug
+- `docs`: update documentation only
+- `refactor`: restructure code without changing behavior
+- `style`: make formatting-only changes
+- `test`: add or update tests
+- `chore`: perform maintenance or release work
+
+For example: `fix: preserve manually opened overview`. Use a commit body when the reason for a change or an important implementation detail is not clear from the subject alone.
+
 ## Credits
 
 Foresight Reborn is a fork of [Foresight](https://github.com/pesader/gnome-shell-extension-foresight), created by [pesader](https://github.com/pesader). The original project was itself based on [Show Application View When Workspace Empty](https://github.com/fawtytoo/GnomeShellExtensions/tree/main/show_applications_instead_of_overview%40fawtytoo%20%283.38%E2%80%9343%29) by [fawtytoo](https://github.com/fawtytoo).
