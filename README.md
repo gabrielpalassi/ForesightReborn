@@ -6,7 +6,14 @@ It reacts to window and workspace events, so there is no polling and no configur
 
 ## Why Foresight Reborn?
 
-Foresight Reborn was created because issues in the original project were remaining unresolved and new releases were taking months to arrive. At the time of the fork, the project appeared to be only minimally maintained. This fork aims to provide timely fixes, regular releases, and active maintenance while continuing the original extension's useful concept.
+Foresight Reborn began as a response to long waits for important fixes in the original Foresight extension. It takes the original's useful idea further with more responsive maintenance and a smoother, more reliable experience:
+
+- Smoother workspace switching with the keyboard, touchpad, or mouse.
+- More reliable behavior across multiple monitors and primary-only workspaces.
+- Correct overview behavior when launching apps with keyboard shortcuts.
+- Better handling of splash screens, updaters, and other temporary windows.
+- A smoother transition to the overview after closing the last window.
+- Fewer unexpected overview changes when switching workspaces quickly.
 
 ## Installation
 
