@@ -1,6 +1,6 @@
 {
   "name": "Foresight Reborn",
-  "description": "Makes empty workspaces immediately useful by opening the Activities overview automatically, keeping your apps and search ready for whatever comes next.",
+  "description": "Makes empty workspaces immediately useful by opening the Activities overview automatically, keeping your apps and search ready for whatever comes next. Foresight Reborn is an actively maintained fork of Foresight.",
   "uuid": "foresight-reborn@gabrielpalassi.github.io",
   "shell-version": ["46", "47", "48", "49", "50"],
   "url": "https://github.com/gabrielpalassi/ForesightReborn"
