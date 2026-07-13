@@ -21,11 +21,9 @@ The recommended installation method is through the [Extension Manager](https://f
 
 Alternatively, install it directly from the GNOME Extensions website:
 
-<a href="https://extensions.gnome.org/extension/EXTENSION_ID/foresight-reborn/">
+<a href="https://extensions.gnome.org/extension/10389/foresight-reborn/">
   <img src="docs/assets/ego.svg" alt="Download from extensions.gnome.org" width="210" height="60">
 </a>
-
-> Foresight Reborn is currently awaiting approval on GNOME Extensions.
 
 ### Install from source
 
