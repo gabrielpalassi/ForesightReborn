@@ -69,13 +69,12 @@ const TEMPORARY_WINDOW_PATTERNS = [
 
 class ForesightReborn {
     constructor(workspaceManager) {
-        this._signals = {};
         this._overviewActivatedByForesightReborn = false;
         this._workspaceManager = workspaceManager;
         this._currentWorkspace = this._workspaceManager.get_active_workspace();
         this._windowRemovalGeneration = 0;
         this._workspaceSwitchGeneration = 0;
-        this._temporaryWindowSignals = new Map();
+        this._temporaryWindows = new Set();
         this._laterIds = new Set();
         this._closeAnimationTimeoutIds = new Set();
         this._mutterSettings = Gio.Settings.new('org.gnome.mutter');
@@ -90,34 +89,32 @@ class ForesightReborn {
     _connectSignals() {
         this._connectWorkspaceSignals();
 
-        this._signals.workspaceSwitched = this._workspaceManager.connect('workspace-switched', () =>
-            this._onWorkspaceSwitched()
+        this._workspaceManager.connectObject(
+            'workspace-switched',
+            () => this._onWorkspaceSwitched(),
+            this
         );
 
-        this._signals.overviewHidden = Main.overview.connect(
+        Main.overview.connectObject(
             'hidden',
-            () => (this._overviewActivatedByForesightReborn = false)
+            () => (this._overviewActivatedByForesightReborn = false),
+            this
         );
     }
 
     _disconnectSignals() {
         this._disconnectWorkspaceSignals();
-
-        if (this._signals.overviewHidden) Main.overview.disconnect(this._signals.overviewHidden);
-
-        if (this._signals.workspaceSwitched)
-            this._workspaceManager.disconnect(this._signals.workspaceSwitched);
+        Main.overview.disconnectObject(this);
+        this._workspaceManager.disconnectObject(this);
     }
 
     _connectWorkspaceSignals() {
-        this._signals.windowRemoved = this._currentWorkspace.connect(
+        this._currentWorkspace.connectObject(
             'window-removed',
-            (workspace, window) => this._onWindowRemoved(workspace, window)
-        );
-
-        this._signals.windowAdded = this._currentWorkspace.connect(
+            (workspace, window) => this._onWindowRemoved(workspace, window),
             'window-added',
-            (workspace, window) => this._onWindowAdded(workspace, window)
+            (workspace, window) => this._onWindowAdded(workspace, window),
+            this
         );
 
         for (const window of this._currentWorkspace.list_windows())
@@ -126,16 +123,7 @@ class ForesightReborn {
 
     _disconnectWorkspaceSignals() {
         this._unwatchAllTemporaryWindows();
-
-        if (this._signals.windowRemoved) {
-            this._currentWorkspace.disconnect(this._signals.windowRemoved);
-            this._signals.windowRemoved = null;
-        }
-
-        if (this._signals.windowAdded) {
-            this._currentWorkspace.disconnect(this._signals.windowAdded);
-            this._signals.windowAdded = null;
-        }
+        this._currentWorkspace.disconnectObject(this);
     }
 
     //
@@ -318,7 +306,7 @@ class ForesightReborn {
         // identity properties used by our temporary-window patterns so the
         // window can be reclassified as soon as it stops matching. Once that
         // happens, stop watching it and handle it like a newly added window.
-        if (this._temporaryWindowSignals.has(window)) return;
+        if (this._temporaryWindows.has(window)) return;
 
         const recheckWindow = () => {
             if (window.get_workspace() !== this._currentWorkspace) return;
@@ -328,27 +316,30 @@ class ForesightReborn {
             if (this._isValidWindow(window, true) && Main.overview.visible) this._hideOverview();
         };
 
-        this._temporaryWindowSignals.set(window, [
-            window.connect('notify::title', recheckWindow),
-            window.connect('notify::wm-class', recheckWindow),
-            window.connect('notify::gtk-application-id', recheckWindow),
-        ]);
+        window.connectObject(
+            'notify::title',
+            recheckWindow,
+            'notify::wm-class',
+            recheckWindow,
+            'notify::gtk-application-id',
+            recheckWindow,
+            this
+        );
+        this._temporaryWindows.add(window);
     }
 
     _unwatchTemporaryWindow(window) {
         // Remove every property watcher registered above. This is called when
         // a temporary window becomes a normal window, is removed, leaves the
         // active workspace, or the extension is disabled.
-        const signalIds = this._temporaryWindowSignals.get(window);
-        if (!signalIds) return;
+        if (!this._temporaryWindows.has(window)) return;
 
-        for (const signalId of signalIds) window.disconnect(signalId);
-        this._temporaryWindowSignals.delete(window);
+        window.disconnectObject(this);
+        this._temporaryWindows.delete(window);
     }
 
     _unwatchAllTemporaryWindows() {
-        for (const window of [...this._temporaryWindowSignals.keys()])
-            this._unwatchTemporaryWindow(window);
+        for (const window of [...this._temporaryWindows]) this._unwatchTemporaryWindow(window);
     }
 
     _removeLaters() {
@@ -375,12 +366,11 @@ class ForesightReborn {
         this._workspaceSwitchGeneration++;
 
         // Clean up all references
-        this._signals = null;
         this._overviewActivatedByForesightReborn = null;
         this._workspaceManager = null;
         this._currentWorkspace = null;
         this._mutterSettings = null;
-        this._temporaryWindowSignals = null;
+        this._temporaryWindows = null;
         this._laterIds = null;
         this._closeAnimationTimeoutIds = null;
     }

@@ -1,6 +1,6 @@
 {
   "name": "foresight-reborn",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "all": "npm run build && npm run setup",
     "build": "mkdir -p dist && gnome-extensions pack --force foresight-reborn@gabrielpalassi.github.io -o dist/",
