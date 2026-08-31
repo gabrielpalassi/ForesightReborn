@@ -27,7 +27,7 @@ Alternatively, install it directly from the GNOME Extensions website:
 
 ### Install from source
 
-Foresight Reborn supports GNOME Shell 46 through 50. Before installing, make sure the following tools are available:
+Foresight Reborn supports GNOME Shell 46 through 51. Before installing, make sure the following tools are available:
 
 - Node.js and npm
 - The `gnome-extensions` command-line tool, usually provided by your distribution's GNOME Shell package
