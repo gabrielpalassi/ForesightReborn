@@ -1,0 +1,15 @@
+[run]
+bun = true
+
+[[fmt.overrides]]
+files = ["*.ts", "*.js", "*.mjs", "*.cjs"]
+
+[fmt.overrides.options]
+printWidth = 100
+tabWidth = 4
+useTabs = false
+semi = true
+singleQuote = true
+bracketSpacing = false
+arrowParens = "avoid"
+trailingComma = "es5"

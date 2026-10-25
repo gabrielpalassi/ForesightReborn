@@ -29,7 +29,7 @@ Alternatively, install it directly from the GNOME Extensions website:
 
 Foresight Reborn supports GNOME Shell 46 through 51. Before installing, make sure the following tools are available:
 
-- Node.js and npm
+- Bun 1.4.4 (the version pinned in `package.json`)
 - The `gnome-extensions` command-line tool, usually provided by your distribution's GNOME Shell package
 
 Clone the repository, install the development dependencies, and build and install the extension:
@@ -37,49 +37,49 @@ Clone the repository, install the development dependencies, and build and instal
 ```bash
 git clone https://github.com/gabrielpalassi/ForesightReborn.git
 cd ForesightReborn
-npm ci
-npm run all
+bun install --frozen-lockfile
+bun run all
 gnome-extensions enable foresight-reborn@gabrielpalassi.github.io
 ```
 
-`npm run all` creates the extension archive in `dist/` and installs it for the current user. You can also enable **Foresight Reborn** using the Extensions or Extension Manager application.
+`bun run all` creates the extension archive in `dist/` and installs it for the current user. You can also enable **Foresight Reborn** using the Extensions or Extension Manager application.
 
 If GNOME Shell does not detect the extension immediately, log out and back in, then run the enable command again. To update an existing source installation:
 
 ```bash
 git pull
-npm ci
-npm run all
+bun install --frozen-lockfile
+bun run all
 gnome-extensions enable foresight-reborn@gabrielpalassi.github.io
 ```
 
 ## Development
 
-Install the dependencies with `npm ci` before using the development commands.
+Install the dependencies with `bun install --frozen-lockfile` before using the development commands.
 
 ```bash
-npm run build              # create the extension archive in dist/
-npm run setup              # reinstall the most recent archive locally
-npm run all                # build and reinstall in one step
+bun run build              # create the extension archive in dist/
+bun run setup              # reinstall the most recent archive locally
+bun run all                # build and reinstall in one step
 
-npm run start              # launch a nested GNOME Shell session
-npm run start:multimonitor # launch a nested session with two virtual monitors
+bun run start              # launch a nested GNOME Shell session
+bun run start:multimonitor # launch a nested session with two virtual monitors
 
-npm run fmt-lint           # check formatting and lint rules
-npm run fmt-lint:fix       # automatically fix formatting and lint issues
+bun run fmt-lint           # check formatting and lint rules
+bun run fmt-lint:fix       # automatically fix formatting and lint issues
 ```
 
-After changing the extension, run `npm run all` before testing it. The nested multi-monitor session is useful for checking workspace behavior with **Workspaces on primary display only** enabled.
+After changing the extension, run `bun run all` before testing it. The nested multi-monitor session is useful for checking workspace behavior with **Workspaces on primary display only** enabled.
 
 ## Contributing
 
 Contributions are welcome. The expected development flow is:
 
 1. Fork the repository and create a focused branch from the latest default branch.
-2. Install dependencies with `npm ci`.
+2. Install dependencies with `bun install --frozen-lockfile`.
 3. Make your changes, keeping each pull request limited to one clear concern.
-4. Run `npm run fmt-lint` and fix any reported formatting or lint issues.
-5. Run `npm run all`, then test the extension in a nested GNOME Shell session with `npm run start` or `npm run start:multimonitor` as appropriate.
+4. Run `bun run fmt-lint` and fix any reported formatting or lint issues.
+5. Run `bun run all`, then test the extension in a nested GNOME Shell session with `bun run start` or `bun run start:multimonitor` as appropriate.
 6. Commit the changes and open a pull request describing what changed, why it changed, and how it was tested.
 
 Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages:
